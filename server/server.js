@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
 connectDB();
@@ -24,17 +24,22 @@ app.use(express.json());
 app.use(cors());
 
 // API routes
-app.get("/", (req, res) => res.send("Server is Live..."));
 app.use("/api/users", userRouter);
 app.use("/api/resumes", resumeRouter);
 app.use("/api/ai", aiRouter);
 
-// Serve React frontend
-app.use(express.static(path.join(__dirname, "../client/dist")));
+// Serve React frontend build
+const clientBuildPath = path.join(__dirname, "../client/dist");
+app.use(express.static(clientBuildPath));
 
-// Catch-all route for React Router
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+// Catch-all route for React Router (exclude API routes)
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(clientBuildPath, "index.html"));
+});
+
+// Optional: handle unknown API routes
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ message: "API route not found" });
 });
 
 // Start server
