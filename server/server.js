@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
@@ -15,27 +14,30 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Connect to MongoDB
 connectDB();
 
+// 1. CORS Configuration
 const corsOptions = {
   origin: "https://resume-builder-wojz.onrender.com",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 };
 
-// Use the middleware
 app.use(cors(corsOptions));
 
-// FIXED LINE: Using Regex instead of "*" to prevent Express 5 PathError
+// 2. The Fix for the "PathError" - Use Regex instead of "*"
 app.options(/(.*)/, cors(corsOptions));
 
 app.use(express.json());
 
+// API routes
 app.use("/api/users", userRouter);
 app.use("/api/resumes", resumeRouter);
 app.use("/api/ai", aiRouter);
 
+// Catch unknown API routes
 app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     return res.status(404).json({ message: "API route not found" });
@@ -43,6 +45,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve React frontend build
 const clientBuildPath = path.join(__dirname, "../client/dist");
 app.use(express.static(clientBuildPath));
 
