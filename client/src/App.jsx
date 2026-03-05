@@ -13,53 +13,36 @@ import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.auth);
+  const { loading, token } = useSelector(state => state.auth);
 
-  const getUserData = async () => {
-    const token = localStorage.getItem("token");
-    try {
-      if (token) {
-        const { data } = await api.get("/api/users/data", {
-          headers: { Authorization: token },
-        });
-        if (data.user) {
-          dispatch(login({ token, user: data.user }));
-        }
-      }
-      dispatch(setLoading(false));
-    } catch (error) {
-      dispatch(setLoading(false));
-      console.log(error.message);
-    }
-  };
-
-  const { token } = useSelector((state) => state.auth);
   useEffect(() => {
-    if (!token) return;
+    const getUserData = async () => {
+      const savedToken = localStorage.getItem("token");
+      if (!savedToken) {
+        dispatch(setLoading(false));
+        return;
+      }
 
-    const fetchUser = async () => {
       try {
-        const { data } = await api.get("/api/users/data", {
-          headers: { Authorization: token },
+        const { data } = await api.get("/users/data", {
+          headers: { Authorization: `Bearer ${savedToken}` }
         });
 
         if (data.user) {
-          dispatch(login({ token, user: data.user }));
+          dispatch(login({ token: savedToken, user: data.user }));
         }
-      } catch (error) {
-        console.log(error.message);
+        dispatch(setLoading(false));
+      } catch (err) {
+        console.log(err.message);
+        dispatch(setLoading(false));
       }
     };
 
-    fetchUser();
-  }, [token]);
+    getUserData();
+  }, [dispatch]);
 
   if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
+    return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
 
   return (
