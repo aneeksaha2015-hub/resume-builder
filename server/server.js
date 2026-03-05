@@ -29,6 +29,8 @@ const clientBuildPath=path.join(__dirname,"../client/dist");
 
 app.use(express.static(clientBuildPath));
 
-app.get("/*",(req,res)=>{res.sendFile(path.join(clientBuildPath,"index.html"))});
+app.use((req,res)=>{
+res.sendFile(path.join(clientBuildPath,"index.html"));
+});
 
 app.listen(PORT,()=>{console.log(`Server running on port ${PORT}`)});
