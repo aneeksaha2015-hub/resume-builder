@@ -8,43 +8,27 @@ import aiRouter from "./routes/aiRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename=fileURLToPath(import.meta.url);
+const __dirname=path.dirname(__filename);
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const app=express();
+const PORT=process.env.PORT||5000;
 
 connectDB();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({origin:"*"}));
 
-/* ---------- API ROUTES FIRST ---------- */
+app.use("/api/users",userRouter);
+app.use("/api/resumes",resumeRouter);
+app.use("/api/ai",aiRouter);
 
-app.use("/api/users", userRouter);
-app.use("/api/resumes", resumeRouter);
-app.use("/api/ai", aiRouter);
+app.get("/api/test",(req,res)=>{res.json({message:"API working"})});
 
-/* ---------- API TEST ROUTE ---------- */
-
-app.get("/api/test", (req, res) => {
-  res.json({ message: "API working" });
-});
-
-/* ---------- FRONTEND BUILD ---------- */
-
-const clientBuildPath = path.join(__dirname, "../client/dist");
+const clientBuildPath=path.join(__dirname,"../client/dist");
 
 app.use(express.static(clientBuildPath));
 
-/* ---------- REACT ROUTER ---------- */
+app.get("/*",(req,res)=>{res.sendFile(path.join(clientBuildPath,"index.html"))});
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(clientBuildPath, "index.html"));
-});
-
-/* ---------- SERVER ---------- */
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT,()=>{console.log(`Server running on port ${PORT}`)});
