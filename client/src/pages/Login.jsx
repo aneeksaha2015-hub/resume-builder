@@ -23,24 +23,23 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Frontend validation
     if (!formData.email || !formData.password || (state !== "login" && !formData.name)) {
       toast.error("Please fill all required fields");
       return;
     }
 
     try {
-      // Remove extra /api
+      // ✅ Remove extra /api
       const { data } = await api.post(`/users/${state}`, formData);
 
-      // Dispatch and store token
-      dispatch(login(data));
+      // Save token and dispatch
       localStorage.setItem("token", data.token);
+      dispatch(login({ token: data.token, user: data.user }));
 
       toast.success(data.message || "Login successful!");
 
       // Redirect to dashboard
-      navigate("/dashboard");
+      navigate("/app");
     } catch (error) {
       console.error(error);
       toast.error(error?.response?.data?.message || "Something went wrong!");
@@ -49,15 +48,12 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[url('/backgroundimg.jpg')] bg-center">
-      <form
-        onSubmit={handleSubmit}
-        className="sm:w-[350px] w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white"
-      >
+      <form onSubmit={handleSubmit} className="sm:w-[350px] w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white">
         <h1 className="text-gray-900 text-3xl mt-10 font-medium">
           {state === "login" ? "Login" : "Sign up"}
         </h1>
@@ -108,20 +104,13 @@ const Login = () => {
           <button type="reset" className="text-sm">Forget password?</button>
         </div>
 
-        <button
-          type="submit"
-          className="mt-2 w-full h-11 rounded-full text-white bg-green-500 hover:opacity-90 transition-opacity"
-        >
+        <button type="submit" className="mt-2 w-full h-11 rounded-full text-white bg-green-500 hover:opacity-90 transition-opacity">
           {state === "login" ? "Login" : "Sign up"}
         </button>
 
-        <p
-          onClick={() => setState((prev) => (prev === "login" ? "register" : "login"))}
-          className="text-gray-500 text-sm mt-3 mb-11 cursor-pointer"
-        >
-          {state === "login"
-            ? "Don't have an account?"
-            : "Already have an account?"}{" "}
+        <p onClick={() => setState(prev => (prev === "login" ? "register" : "login"))}
+           className="text-gray-500 text-sm mt-3 mb-11 cursor-pointer">
+          {state === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
           <span className="text-green-500 hover:underline">click here</span>
         </p>
       </form>
