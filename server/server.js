@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
@@ -15,26 +14,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// Connect DB
 connectDB();
 
-// ✅ JSON parsing middleware
+// JSON parsing
 app.use(express.json());
 
-// ✅ CORS setup for frontend
+// ✅ CORS for frontend
 app.use(cors({
-  origin: "https://resume-builder-wojz.onrender.com", // your frontend URL
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
-  credentials: true, // allow Authorization headers
-}));
-
-// ✅ Handle preflight OPTIONS requests
-app.options("/*", cors({
   origin: "https://resume-builder-wojz.onrender.com",
-  credentials: true
+  credentials: true,
 }));
 
-// ✅ API routes
+// API routes
 app.use("/api/users", userRouter);
 app.use("/api/resumes", resumeRouter);
 app.use("/api/ai", aiRouter);
@@ -44,12 +36,12 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "API working" });
 });
 
-// ✅ Serve frontend
+// Serve frontend
 const clientBuildPath = path.join(__dirname, "../client/dist");
 app.use(express.static(clientBuildPath));
 
-// ✅ Catch-all frontend route
-app.get("/*", (req, res) => {
+// ✅ Catch-all frontend route for non-API paths
+app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(clientBuildPath, "index.html"));
 });
 
